@@ -58,46 +58,41 @@ export default function ConfigFields({
 
   return (
     <Stack>
-      {currentSchema.map((field) => {
-        if (field.key === "session") {
-          return (
-            <Stack gap="md" key={"session-stack"}>
-              <Group justify="space-between" align="center">
-                <Title order={4}>Sessions</Title>
-                <Button
-                  onClick={onAddSession}
-                  disabled={
-                    (fileConfig as EventConfiguration).sessions?.length >= 3
-                  }
-                  leftSection={<Plus size={16} />}
-                >
-                  Add Session
-                </Button>
-              </Group>
-              {(fileConfig as EventConfiguration).sessions?.map(
-                (session, index) => (
-                  <SessionComponent
-                    key={index}
-                    session={session}
-                    index={index}
-                    onChange={onSessionChange}
-                    onRemove={onRemoveSession}
-                  />
-                )
-              )}
-            </Stack>
-          );
-        } else {
-          return (
-            <ConfigFieldInput
-              key={field.key}
-              field={field}
-              value={fileConfig[field.key] ?? ""}
-              onChange={(val) => onConfigChange(field.key, val)}
-            />
-          );
-        }
-      })}
+      {currentSchema.map((field) => (
+        <ConfigFieldInput
+          key={field.key}
+          field={field}
+          value={fileConfig[field.key] ?? ""}
+          onChange={(val) => onConfigChange(field.key, val)}
+        />
+      ))}
+      {fileName === "event" && (
+        <Stack gap="md" key={"session-stack"}>
+          <Group justify="space-between" align="center">
+            <Title order={4}>Sessions</Title>
+            <Button
+              onClick={onAddSession}
+              disabled={
+                (fileConfig as EventConfiguration).sessions?.length >= 3
+              }
+              leftSection={<Plus size={16} />}
+            >
+              Add Session
+            </Button>
+          </Group>
+          {(fileConfig as EventConfiguration).sessions?.map(
+            (session, index) => (
+              <SessionComponent
+                key={index}
+                session={session}
+                index={index}
+                onChange={onSessionChange}
+                onRemove={onRemoveSession}
+              />
+            )
+          )}
+        </Stack>
+      )}
     </Stack>
   );
 }
