@@ -27,7 +27,9 @@ export async function GET() {
         configFiles[file as keyof Configs] = JSON.parse(cleanedContent);
       }
     }
-
+    if (Object.keys(configFiles).length === 0) {
+      throw new Error("No config files found");
+    }
     return NextResponse.json(configFiles);
   } catch (error) {
     console.log("Failed to read config files:", error);
