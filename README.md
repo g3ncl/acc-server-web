@@ -1,8 +1,8 @@
 # acc-server-web
 
-acc-server-web is a Docker-based project that packages an Assetto Corsa Competizione (ACC) server running under Wine alongside a Next.js web application. The webapp lets you edit server configuration files, check server status, and manage the server (stop, start, and restart).
+acc-server-web is a Docker-based project that packages an Assetto Corsa Competizione (ACC) server running under Wine alongside a Next.js web application. The web UI lets you edit server configuration files, check server status, and manage the server (stop, start, and restart).
 
-**Disclaimer:** This project is not associated with, endorsed by, or affiliated with KUNOS Simulazioni in any way.
+The web UI is built using Mantine v7.
 
 ## Getting Started
 
@@ -27,17 +27,17 @@ acc-server-web is a Docker-based project that packages an Assetto Corsa Competiz
 
 3.  **Run the Docker Container:**
 
-    _Important Security Note:_ Ensure you only expose the necessary ports for the ACC server and _do not_ expose port 3000 for the webapp to the outside network. This is crucial for preventing unauthorized modification of your server configuration.
+**Important Security Note:** Ensure you only expose on the external network only the necessary ports for the ACC server and **do not** expose port 3000 for the webapp to the outside network. This is crucial for preventing unauthorized modification of your server configuration.
 
     ```sh
-    docker run -p <ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP> -p <ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP> -d acc-server-web
+    docker run -p <WEB_UI_PORT>:<3000> <ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP> -p <ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP> -d acc-server-web
     ```
 
-    Replace `<ACC_SERVER_PORT_1>` and `<ACC_SERVER_PORT_2>` with the actual ports used by your ACC server. Refer to the ACC documentation for the correct ports.
+    Replace `<ACC_SERVER_PORT_1>` and `<ACC_SERVER_PORT_2>` with the actual ports used by your ACC server. Replace <WEB_UI_PORT> The local port where you want to access the web interface. Refer to the ACC documentation for the correct ports.
 
-4.  **Access the Webapp:**
+1.  **Access the Webapp:**
 
-    Once the container is running, access the web configuration panel by navigating to `http://localhost:3000` in your web browser _from a machine on the same network as the Docker host or using a VPN_.
+    Once the container is running, access the web configuration panel by navigating to `http://localhost:<WEB_UI_PORT>` in your web browser from a machine on the same network as the Docker host or using a VPN.
 
 ## Configuration
 
@@ -61,6 +61,7 @@ services:
   acc-server-web:
     image: ghcr.io/g3ncl/acc-server-web:latest
     ports:
+      - "<WEB_UI_PORT>:<3000>"
       - "<ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP>"
       - "<ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>"
 ```
@@ -71,8 +72,6 @@ Then run:
 docker-compose up -d
 ```
 
-Remember to replace `<ACC_SERVER_PORT_UDP>` and `<ACC_SERVER_PORT_TCP>` with the correct ACC server ports.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests.
@@ -80,3 +79,7 @@ Contributions are welcome! Please feel free to submit pull requests.
 ## License
 
 This project is licensed under the GNU General Public License v2.0 - see the [LICENSE](LICENSE) file for details. GPL-2.0 ensures that this software remains free and open source, requiring any modifications or derivative works to be distributed under the same license terms.
+
+## Disclaimer
+
+This project is not associated with, endorsed by, or affiliated with KUNOS Simulazioni in any way.
