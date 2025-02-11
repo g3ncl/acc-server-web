@@ -2,22 +2,34 @@ import { ConfigField } from "@/types/configTypes";
 
 export const serverSchema: ConfigField[] = [
   {
-    key: "udpPort",
-    label: "UDP Port",
-    inputType: "number",
-    range: { min: 1, max: 65535 },
-    options: null,
-    description:
-      "Connected clients will use this Port to stream the car positions and is used for the ping test",
-  },
-  {
     key: "tcpPort",
     label: "TCP Port",
     inputType: "number",
     range: { min: 1, max: 65535 },
     options: null,
     description:
-      "ACC clients will use this port to establish a connection to the server",
+      "Port used by ACC clients to establish a connection to the server.",
+  },
+  {
+    key: "udpPort",
+    label: "UDP Port",
+    inputType: "number",
+    range: { min: 1, max: 65535 },
+    options: null,
+    description:
+      "Port used by connected clients to stream car positions and for the ping test.",
+  },
+  {
+    key: "registerToLobby",
+    label: "Register to Lobby",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: 0, label: "Private Multiplayer (Not registered in backend)" },
+      { value: 1, label: "Public Multiplayer (Registered in backend)" },
+    ],
+    description:
+      "Determines if the server is registered in the backend: 0 for private, 1 for public.",
   },
   {
     key: "maxConnections",
@@ -26,7 +38,7 @@ export const serverSchema: ConfigField[] = [
     range: { min: 1, max: 85 },
     options: null,
     description:
-      "The maximum amount of connections a server will accept at a time",
+      "The maximum number of connections the server will accept at a time.",
   },
   {
     key: "lanDiscovery",
@@ -37,36 +49,24 @@ export const serverSchema: ConfigField[] = [
       { value: 0, label: "Disabled" },
       { value: 1, label: "Enabled" },
     ],
-    description: "Defines if the server will listen to LAN discovery requests",
-  },
-  {
-    key: "registerToLobby",
-    label: "Register to Lobby",
-    inputType: "select",
-    range: null,
-    options: [
-      { value: 0, label: "Disabled (Private Server)" },
-      { value: 1, label: "Enabled (Public Server)" },
-    ],
-    description:
-      "When 0, this server won't register to the backend. Is useful for LAN sessions",
+    description: "Defines if the server will listen to LAN discovery requests.",
   },
   {
     key: "configVersion",
-    label: "Configuration Version",
+    label: "Config Version",
     inputType: "number",
-    range: { min: 1, max: 999 },
+    range: null,
     options: null,
-    description: "Version of the configuration format",
+    description: "Version of the configuration file.",
   },
   {
     key: "publicIP",
-    label: "Public IP Address",
+    label: "Public IP",
     inputType: "text",
     range: null,
     options: null,
     description:
-      "Explicitly defines the public IP address this server is listening to",
+      "Explicitly defines the public IP address. Useful if the backend is connected via a load balancer or reverse proxy.",
   },
 ];
 
@@ -165,6 +165,18 @@ export const settingsSchema: ConfigField[] = [
     description: "Enables or disables saving session leaderboards.",
   },
   {
+    key: "dumpEntryList",
+    label: "Dump Entry List",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: 0, label: "Disabled" },
+      { value: 1, label: "Enabled" },
+    ],
+    description:
+      "Enables or disables saving an entry list at the end of any Qualifying session.",
+  },
+  {
     key: "isRaceLocked",
     label: "Race Locked",
     inputType: "select",
@@ -199,14 +211,32 @@ export const settingsSchema: ConfigField[] = [
     description: "If disabled, penalties are handed out instead of auto-DQ.",
   },
   {
+    key: "shortFormationLap",
+    label: "Short Formation Lap",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: 0, label: "Entire formation lap" },
+      { value: 1, label: "Short formation lap" },
+    ],
+    description: "If disabled, penalties are handed out instead of auto-DQ.",
+  },
+  {
     key: "formationLapType",
     label: "Formation Lap Type",
     inputType: "select",
     range: null,
     options: [
-      { value: 3, label: "Default with Position Control" },
-      { value: 0, label: "Old Limiter Lap" },
-      { value: 1, label: "Free (Manual Start)" },
+      {
+        value: 5,
+        label:
+          "One short formation lap with position control and UI + 1 ghosted cars lap",
+      },
+      { value: 4, label: "One free formation lap + 1 ghosted cars lap" },
+
+      { value: 3, label: "Default with Position Control and UI" },
+      { value: 1, label: "Old Limiter Lap" },
+      { value: 0, label: "Free (Manual Start)" },
     ],
     description: "Defines the type of formation lap used on the server.",
   },
@@ -248,7 +278,7 @@ export const eventSchema: ConfigField[] = [
   },
   {
     key: "preRaceWaitingTimeSeconds",
-    label: "Pre-Race Waiting Time (s)",
+    label: "Pre-Race Waiting Time",
     inputType: "number",
     range: { min: 30, max: 300 },
     options: null,
@@ -256,20 +286,21 @@ export const eventSchema: ConfigField[] = [
   },
   {
     key: "sessionOverTimeSeconds",
-    label: "Session Overtime (s)",
+    label: "Session Overtime",
     inputType: "number",
     range: { min: 60, max: 300 },
     options: null,
     description:
-      "Time (in seconds) after the session end before it is forcibly closed.",
+      "Time (s) after the session end before it is forcibly closed. Something like 107% of the expected laptime is recommended. ",
   },
   {
     key: "ambientTemp",
-    label: "Ambient Temperature (°C)",
+    label: "Ambient Temperature",
     inputType: "number",
     range: { min: 15, max: 40 },
     options: null,
     description: "Sets the baseline ambient temperature in °C.",
+    //TODO: check limits
   },
   {
     key: "cloudLevel",
@@ -297,66 +328,6 @@ export const eventSchema: ConfigField[] = [
     options: null,
     description:
       "Defines how dynamic the weather changes will be. 0 is static, 7 is highly dynamic.",
-  },
-];
-
-export const eventRulesSchema: ConfigField[] = [
-  {
-    key: "qualifyStandingType",
-    label: "Qualifying Standing Type",
-    inputType: "select",
-    range: null,
-    options: [
-      { value: 1, label: "Fastest Lap" },
-      { value: 2, label: "Average Lap" },
-    ],
-    description:
-      "Defines how the qualifying standings are determined. Use 1, averaging Qualy is not yet officially supported.",
-  },
-  {
-    key: "pitWindowLengthSec",
-    label: "Pit Window Length (s)",
-    inputType: "number",
-    range: { min: -1, max: 3600 },
-    options: null,
-    description:
-      "Defines the duration of the pit window in seconds. -1 disables the pit window.",
-  },
-  {
-    key: "driverStintTimeSec",
-    label: "Driver Stint Time (s)",
-    inputType: "number",
-    range: { min: -1, max: 10800 },
-    options: null,
-    description:
-      "Defines the maximum time a driver can stay in the car before a penalty. -1 disables the stint limit.",
-  },
-  {
-    key: "mandatoryPitstopCount",
-    label: "Mandatory Pitstop Count",
-    inputType: "number",
-    range: { min: 0, max: 10 },
-    options: null,
-    description: "Defines the number of mandatory pitstops required.",
-  },
-  {
-    key: "isRefuellingAllowedInRace",
-    label: "Allow Refueling in Race",
-    inputType: "select",
-    range: null,
-    options: [
-      { value: true, label: "Yes" },
-      { value: false, label: "No" },
-    ],
-    description: "Defines whether refueling is allowed during race pitstops.",
-  },
-  {
-    key: "tyreSetCount",
-    label: "Tyre Set Count",
-    inputType: "number",
-    range: { min: 1, max: 50 },
-    options: null,
-    description: "Defines the number of tyre sets available for the event.",
   },
 ];
 export const sessionSchema: ConfigField[] = [
@@ -409,6 +380,133 @@ export const sessionSchema: ConfigField[] = [
     description: "Defines the duration of the session in minutes.",
   },
 ];
+export const eventRulesSchema: ConfigField[] = [
+  {
+    key: "qualifyStandingType",
+    label: "Qualifying Standing Type",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: 1, label: "Fastest Lap" },
+      { value: 2, label: "Average Lap" },
+    ],
+    description:
+      "Defines how qualifying standings are determined. Use 1, averaging Qualy is not yet officially supported.",
+  },
+  {
+    key: "pitWindowLengthSec",
+    label: "Pit Window Length (s)",
+    inputType: "number",
+    range: { min: -1, max: 3600 },
+    options: null,
+    description:
+      "Defines the duration of the pit window in seconds. -1 disables the pit window. Only use with mandatoryPitstopCount with a value of 1 or higher.",
+  },
+  {
+    key: "driverStintTimeSec",
+    label: "Driver Stint Time (s)",
+    inputType: "number",
+    range: { min: -1, max: 10800 },
+    options: null,
+    description:
+      "Defines the maximum time a driver can stay in the car before a penalty. -1 disables the stint limit. Can be used to balance fuel efficient cars in endurance races.",
+  },
+  {
+    key: "mandatoryPitstopCount",
+    label: "Mandatory Pitstop Count",
+    inputType: "number",
+    range: { min: 0, max: 10 },
+    options: null,
+    description:
+      "Defines the number of mandatory pitstops required. Value of 0 disables mandatory pitstops.",
+  },
+  {
+    key: "maxTotalDrivingTime",
+    label: "Max Total Driving Time (s)",
+    inputType: "number",
+    range: { min: -1, max: 86400 },
+    options: null,
+    description:
+      "Maximum driving time for a single driver. Used for driver swap situations to enforce minimum driving time for each driver. -1 disables the feature.",
+  },
+  {
+    key: "maxDriversCount",
+    label: "Max Drivers Count",
+    inputType: "number",
+    range: { min: 1, max: 10 },
+    options: null,
+    description:
+      "Maximum number of drivers per car for driver swap situations. maxTotalDrivingTime will be scaled based on team size.",
+  },
+  {
+    key: "isRefuellingAllowedInRace",
+    label: "Allow Refueling in Race",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    description: "Defines whether refueling is allowed during race pitstops.",
+  },
+  {
+    key: "isRefuellingTimeFixed",
+    label: "Refueling Time Fixed",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    description:
+      "If true, refuelling takes 25 seconds. If false, refuelling time is proportional to fuel amount. Used to balance fuel efficient cars.",
+  },
+  {
+    key: "isMandatoryPitstopRefuellingRequired",
+    label: "Mandatory Pitstop Refueling",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    description:
+      "If true, mandatory pitstops must include refueling of at least 1 liter.",
+  },
+  {
+    key: "isMandatoryPitstopTyreChangeRequired",
+    label: "Mandatory Pitstop Tyre Change",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    description: "If true, mandatory pitstops must include a tyre change.",
+  },
+  {
+    key: "isMandatoryPitstopSwapDriverRequired",
+    label: "Mandatory Pitstop Driver Swap",
+    inputType: "select",
+    range: null,
+    options: [
+      { value: true, label: "Yes" },
+      { value: false, label: "No" },
+    ],
+    description:
+      "If true, mandatory pitstops must include a driver swap. Only applies to cars in driver swap situations.",
+  },
+  {
+    key: "tyreSetCount",
+    label: "Tyre Set Count",
+    inputType: "number",
+    range: { min: 1, max: 50 },
+    options: null,
+    description:
+      "Defines the number of tyre sets available for the event.Not currently listed or described in the Kunos Server Admin manual",
+  },
+];
+
 export const assistRulesSchema: ConfigField[] = [
   {
     key: "stabilityControlLevelMax",
