@@ -17,11 +17,13 @@ import { Session } from "@/types/configTypes";
 import ConfigFields from "../ConfigFields/ConfigFields";
 import { notifications } from "@mantine/notifications";
 import classes from "@/notifications/notifications.module.css";
+import ImportExportBar from "../ImportExportBar/ImportExportBar";
 
 export default function ConfigurationEditor() {
   const [configs, setConfigs] = useState<Configs>({});
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const [refreshConfigs, setRefreshConfigs] = useState<number>(0);
 
   const isMobile = useMobileDetection();
 
@@ -51,7 +53,7 @@ export default function ConfigurationEditor() {
     };
     fetchConfigs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refreshConfigs]);
 
   const handleChange = (file: keyof Configs, key: string, value: unknown) => {
     if (value === "") {
@@ -199,6 +201,7 @@ export default function ConfigurationEditor() {
   return (
     <Container size="sm">
       <Stack gap={32}>
+        <ImportExportBar setRefreshConfigs={setRefreshConfigs} />
         {isMobile ? (
           <Accordion value={activeKey} onChange={setActiveKey}>
             {Object.entries(configs).map(([fileName, fileConfig]) => (
