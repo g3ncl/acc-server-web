@@ -2,6 +2,7 @@ import {
   SingleFileConfig,
   EventConfiguration,
   Session,
+  Configs,
 } from "@/types/configTypes";
 import { Stack, Group, Title, Button } from "@mantine/core";
 import { Plus } from "lucide-react";
@@ -15,7 +16,25 @@ import {
   assistRulesSchema,
 } from "@/const/predefinedValues";
 
+const getSchemaForFile = (fileName: keyof Configs) => {
+  switch (fileName) {
+    case "configuration":
+      return serverSchema;
+    case "settings":
+      return settingsSchema;
+    case "event":
+      return eventSchema;
+    case "eventRules":
+      return eventRulesSchema;
+    case "assistRules":
+      return assistRulesSchema;
+    default:
+      return [];
+  }
+};
+
 interface ConfigFieldsProps {
+  fileName: keyof Configs;
   fileConfig: SingleFileConfig;
   onConfigChange: (key: string, value: unknown) => void;
   onSessionChange: (
@@ -28,39 +47,21 @@ interface ConfigFieldsProps {
 }
 
 export default function ConfigFields({
+  fileName,
   fileConfig,
   onConfigChange,
   onSessionChange,
   onAddSession,
   onRemoveSession,
 }: ConfigFieldsProps) {
-  const allSchemas = [
-    ...serverSchema,
-    ...settingsSchema,
-    ...eventSchema,
-    ...eventRulesSchema,
-    ...assistRulesSchema,
-  ];
+  const currentSchema = getSchemaForFile(fileName);
 
   return (
     <Stack>
-      {Object.entries(fileConfig).map(([key, value]) => {
-        const field = allSchemas.find((f) => f.key === key);
-
-        if (field) {
+      {currentSchema.map((field) => {
+        if (field.key === "session") {
           return (
-            <ConfigFieldInput
-              key={field.key}
-              field={field}
-              value={value}
-              onChange={(val) => onConfigChange(key, val)}
-            />
-          );
-        }
-
-        if (key === "sessions") {
-          return (
-            <Stack key={key} gap="md">
+            <Stack gap="md" key={"session-stack"}>
               <Group justify="space-between" align="center">
                 <Title order={4}>Sessions</Title>
                 <Button
@@ -86,9 +87,16 @@ export default function ConfigFields({
               )}
             </Stack>
           );
+        } else {
+          return (
+            <ConfigFieldInput
+              key={field.key}
+              field={field}
+              value={fileConfig[field.key] ?? ""}
+              onChange={(val) => onConfigChange(field.key, val)}
+            />
+          );
         }
-
-        return null;
       })}
     </Stack>
   );

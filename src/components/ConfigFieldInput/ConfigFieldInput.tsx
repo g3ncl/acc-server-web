@@ -24,6 +24,7 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({
           min={field.range?.min}
           max={field.range?.max}
           description={field.description}
+          placeholder="Currently not set"
         />
       );
     case "text":
@@ -34,6 +35,7 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({
           value={value as string}
           onChange={(event) => onChange(event.currentTarget.value)}
           description={field.description}
+          placeholder="Currently not set"
         />
       );
     case "select":
@@ -61,8 +63,10 @@ const ConfigFieldInput: React.FC<ConfigFieldInputProps> = ({
             onChange(finalValue);
           }}
           description={field.description}
+          onClear={() => onChange("")}
           searchable={false}
-          clearable={false}
+          placeholder="Currently not set"
+          clearable={true}
         />
       );
     default:

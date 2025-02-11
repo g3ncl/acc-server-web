@@ -158,14 +158,17 @@ export interface BalanceOfPerformance {
   entries: BalanceOfPerformanceEntry[];
 }
 
-export type SingleFileConfig =
+export type SingleFileConfig = {
+  [key: string]: string | number;
+} & (
   | ServerConfiguration
   | ServerSettings
   | EventConfiguration
   | EventRules
   | AssistRules
   | EntryList
-  | BalanceOfPerformance;
+  | BalanceOfPerformance
+);
 
 export interface ConfigField {
   key: string;

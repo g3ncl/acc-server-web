@@ -54,10 +54,21 @@ export default function ConfigurationEditor() {
   }, []);
 
   const handleChange = (file: keyof Configs, key: string, value: unknown) => {
-    setConfigs((prev: Configs) => ({
-      ...prev,
-      [file]: { ...prev[file], [key]: value },
-    }));
+    if (value === "") {
+      setConfigs((prev: Configs) => {
+        const newFileConfig = { ...prev[file] } as SingleFileConfig;
+        delete newFileConfig[key];
+        return {
+          ...prev,
+          [file]: newFileConfig,
+        };
+      });
+    } else {
+      setConfigs((prev: Configs) => ({
+        ...prev,
+        [file]: { ...prev[file], [key]: value },
+      }));
+    }
   };
 
   const handleSave = async () => {
@@ -170,19 +181,6 @@ export default function ConfigurationEditor() {
     });
   };
 
-  const renderConfigContent = (
-    fileName: keyof Configs,
-    fileConfig: SingleFileConfig
-  ) => (
-    <ConfigFields
-      fileConfig={fileConfig}
-      onConfigChange={(key, value) => handleChange(fileName, key, value)}
-      onSessionChange={handleSessionChange}
-      onAddSession={addSession}
-      onRemoveSession={removeSession}
-    />
-  );
-
   if (error) {
     return null;
   }
@@ -207,10 +205,16 @@ export default function ConfigurationEditor() {
               <Accordion.Item key={fileName} value={fileName}>
                 <Accordion.Control>{fileName}</Accordion.Control>
                 <Accordion.Panel>
-                  {renderConfigContent(
-                    fileName as keyof Configs,
-                    fileConfig as SingleFileConfig
-                  )}
+                  <ConfigFields
+                    fileName={fileName as keyof Configs}
+                    fileConfig={fileConfig as SingleFileConfig}
+                    onConfigChange={(key, value) =>
+                      handleChange(fileName as keyof Configs, key, value)
+                    }
+                    onSessionChange={handleSessionChange}
+                    onAddSession={addSession}
+                    onRemoveSession={removeSession}
+                  />
                 </Accordion.Panel>
               </Accordion.Item>
             ))}
@@ -232,10 +236,16 @@ export default function ConfigurationEditor() {
             {Object.entries(configs).map(([fileName, fileConfig]) => (
               <Tabs.Panel key={fileName} value={fileName}>
                 <Box p="md">
-                  {renderConfigContent(
-                    fileName as keyof Configs,
-                    fileConfig as SingleFileConfig
-                  )}
+                  <ConfigFields
+                    fileName={fileName as keyof Configs}
+                    fileConfig={fileConfig as SingleFileConfig}
+                    onConfigChange={(key, value) =>
+                      handleChange(fileName as keyof Configs, key, value)
+                    }
+                    onSessionChange={handleSessionChange}
+                    onAddSession={addSession}
+                    onRemoveSession={removeSession}
+                  />
                 </Box>
               </Tabs.Panel>
             ))}
