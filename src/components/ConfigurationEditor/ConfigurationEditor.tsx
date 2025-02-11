@@ -20,34 +20,37 @@ import classes from "@/notifications/notifications.module.css";
 
 export default function ConfigurationEditor() {
   const [configs, setConfigs] = useState<Configs>({});
-  const [loading, setLoading] = useState(true);
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [error, setError] = useState<boolean>(false);
 
   const isMobile = useMobileDetection();
 
   useEffect(() => {
     const fetchConfigs = async () => {
       try {
-        setLoading(true);
+        setError(false);
         const res = await fetch("/api/config");
         if (!res.ok) {
           throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
         const data: Configs = await res.json();
         setConfigs(data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to load configs:", err);
+      } catch (error) {
+        setError(true);
+
+        console.error("Failed to load configs:", error);
         notifications.show({
           color: "red",
           title: "Failed to load configurations",
-          message: (err as Error).message.toString(),
+          message: (error as Error).message,
+          autoClose: false,
           classNames: classes,
+          position: isMobile ? "bottom-center" : "bottom-right",
         });
-        setLoading(false);
       }
     };
     fetchConfigs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (file: keyof Configs, key: string, value: unknown) => {
@@ -59,6 +62,16 @@ export default function ConfigurationEditor() {
 
   const handleSave = async () => {
     try {
+      notifications.show({
+        id: "config-save",
+        color: "gray",
+        title: "Saving Configurations",
+        message: "Please wait while is being saved...",
+        loading: true,
+        autoClose: false,
+        classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
+      });
       const res = await fetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,20 +80,28 @@ export default function ConfigurationEditor() {
       if (!res.ok) {
         throw new Error(`Error: ${res.status} ${res.statusText}`);
       } else {
-        notifications.show({
+        notifications.update({
+          id: "config-save",
           color: "green",
           title: "Configurations Saved",
           message: "Configurations saved successfully!",
+          loading: false,
+          autoClose: 2000,
           classNames: classes,
+          position: isMobile ? "bottom-center" : "bottom-right",
         });
       }
     } catch (error) {
       console.error("Failed to save configs:", error);
-      notifications.show({
+      notifications.update({
+        id: "config-save",
         color: "red",
         title: "Error saving configurations",
-        message: (error as Error).message.toString(),
+        message: (error as Error).message,
+        loading: false,
+        autoClose: 2000,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
     }
   };
@@ -162,7 +183,10 @@ export default function ConfigurationEditor() {
     />
   );
 
-  if (loading || !configs.configuration) {
+  if (error) {
+    return null;
+  }
+  if (!configs.configuration) {
     return (
       <Container size="sm">
         <Stack gap="md">
@@ -173,6 +197,7 @@ export default function ConfigurationEditor() {
       </Container>
     );
   }
+
   return (
     <Container size="sm">
       <Stack gap={32}>
