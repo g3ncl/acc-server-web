@@ -19,6 +19,10 @@
 .mobileLink {
   text-decoration: none;
   color: inherit;
+  width: 9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .link {
   width: 100%;

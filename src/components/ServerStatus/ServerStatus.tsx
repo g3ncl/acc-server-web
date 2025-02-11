@@ -12,11 +12,14 @@ import {
 } from "@mantine/core";
 import { useInterval } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
 import classes from "@/notifications/notifications.module.css";
 
 export function ServerStatus() {
   const [isRunning, setIsRunning] = useState<boolean | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const isMobile = useMobileDetection();
 
   // Updated checkStatus to return running state
   const checkStatus = async (): Promise<boolean> => {
@@ -30,7 +33,6 @@ export function ServerStatus() {
         color: "red",
         title: "Server status error",
         message: (error as Error).message || "Failed to fetch server status",
-        classNames: classes,
       });
       return false;
     }
@@ -55,6 +57,7 @@ export function ServerStatus() {
       loading: true,
       autoClose: false,
       classNames: classes,
+      position: isMobile ? "bottom-center" : "bottom-right",
     });
     try {
       await fetch("/api/start", { method: "POST" });
@@ -69,6 +72,7 @@ export function ServerStatus() {
           loading: false,
           autoClose: 2000,
           classNames: classes,
+          position: isMobile ? "bottom-center" : "bottom-right",
         });
       } else {
         throw new Error("Server failed to start");
@@ -82,6 +86,7 @@ export function ServerStatus() {
         loading: false,
         autoClose: 2000,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
     }
     setIsLoading(false);
@@ -98,6 +103,7 @@ export function ServerStatus() {
         loading: true,
         autoClose: false,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
       await fetch("/api/stop", { method: "POST" });
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -113,6 +119,7 @@ export function ServerStatus() {
         loading: false,
         autoClose: 2000,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
     } catch (error) {
       notifications.update({
@@ -123,6 +130,7 @@ export function ServerStatus() {
         loading: false,
         autoClose: 2000,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
     }
     setIsLoading(false);
@@ -138,6 +146,7 @@ export function ServerStatus() {
       loading: true,
       autoClose: false,
       classNames: classes,
+      position: isMobile ? "bottom-center" : "bottom-right",
     });
     try {
       await fetch("/api/restart", { method: "POST" });
@@ -152,6 +161,7 @@ export function ServerStatus() {
           loading: false,
           autoClose: 2000,
           classNames: classes,
+          position: isMobile ? "bottom-center" : "bottom-right",
         });
       } else {
         throw new Error("Server failed to restart");
@@ -165,6 +175,7 @@ export function ServerStatus() {
         loading: false,
         autoClose: 2000,
         classNames: classes,
+        position: isMobile ? "bottom-center" : "bottom-right",
       });
     }
     setIsLoading(false);
@@ -173,7 +184,7 @@ export function ServerStatus() {
   return (
     <Container size="sm">
       <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Stack gap="md">
+        <Stack gap="xl">
           <Flex align="center" justify="flex-start" gap={16}>
             <Text fw={500}>Server Status:</Text>
             {isRunning === undefined ? (
