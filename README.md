@@ -29,15 +29,19 @@ The web UI is built using Mantine v7.
 
 **Important Security Note:** Ensure you only expose on the external network only the necessary ports for the ACC server and **do not** expose port 3000 for the webapp to the outside network. This is crucial for preventing unauthorized modification of your server configuration.
 
-    ```sh
-    docker run -p <WEB_UI_PORT>:<3000> <ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP> -p <ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP> -d acc-server-web
-    ```
+```sh
+ docker run -p <WEB_UI_PORT>:<3000> \
+ -p <ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP>/udp \
+ -p <ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>/tcp \
+ -v acc-server-cfg:/app/acc-server/cfg \
+ -d acc-server-web
+```
 
-    Replace `<ACC_SERVER_PORT_1>` and `<ACC_SERVER_PORT_2>` with the actual ports used by your ACC server. Replace <WEB_UI_PORT> The local port where you want to access the web interface. Refer to the ACC documentation for the correct ports.
+Replace `<ACC_SERVER_PORT_1>` and `<ACC_SERVER_PORT_2>` with the actual ports used by your ACC server. Replace <WEB_UI_PORT> The local port where you want to access the web interface. Refer to the ACC documentation for the correct ports.
 
 1.  **Access the Webapp:**
 
-    Once the container is running, access the web configuration panel by navigating to `http://localhost:<WEB_UI_PORT>` in your web browser from a machine on the same network as the Docker host or using a VPN.
+Once the container is running, access the web configuration panel by navigating to `http://localhost:<WEB_UI_PORT>` in your web browser from a machine on the same network as the Docker host or using a VPN.
 
 ## Configuration
 
@@ -61,9 +65,14 @@ services:
   acc-server-web:
     image: ghcr.io/g3ncl/acc-server-web:latest
     ports:
-      - "<WEB_UI_PORT>:<3000>"
-      - "<ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP>"
-      - "<ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>"
+      - "<WEB_UI_PORT>:3000"
+      - "<ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP>/udp"
+      - "<ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>/tcp"
+    volumes:
+      - acc-server-cfg:/app/acc-server/cfg
+
+volumes:
+  acc-server-cfg:
 ```
 
 Then run:

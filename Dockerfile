@@ -47,7 +47,7 @@ WORKDIR /app
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY cfg /app/acc-server/cfg/
+COPY cfg /app/default-cfg/
 COPY accServer.exe /app/acc-server/accServer.exe
 
 
@@ -61,10 +61,17 @@ RUN groupadd -g 1001 appgroup && \
     echo 'wine ./accServer.exe > /app/wine.log 2>&1 &' >> /app/start_wine.sh && \
     chmod +x /app/start_wine.sh && \
     echo '#!/bin/bash' > /app/start.sh && \
+    echo 'for file in /app/default-cfg/*.json; do' >> /app/start.sh && \
+    echo '  filename=$(basename "$file")' >> /app/start.sh && \
+    echo '  if [ ! -f "/app/acc-server/cfg/$filename" ]; then' >> /app/start.sh && \
+    echo '    cp "$file" "/app/acc-server/cfg/$filename"' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo 'done' >> /app/start.sh && \
     echo '/app/start_wine.sh' >> /app/start.sh && \
     echo '/app/start_node.sh' >> /app/start.sh && \
     chmod +x /app/start.sh && \
     mkdir /app/log && \
+    mkdir /app/acc-server/cfg && \
     chown -R appuser:appgroup /app
 
 USER appuser
