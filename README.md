@@ -34,6 +34,7 @@ The web UI is built using Mantine v7.
  -p <ACC_SERVER_PORT_UDP>:<ACC_SERVER_PORT_UDP>/udp \
  -p <ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>/tcp \
  -v acc-server-cfg:/app/acc-server/cfg \
+ -v acc-server-results:/app/acc-server/results \
  -d acc-server-web
 ```
 
@@ -47,12 +48,24 @@ Once the container is running, access the web configuration panel by navigating 
 
 Server configuration files can be edited via the web interface. Changes are applied after restarting the ACC server through the webapp.
 
-## Automated Builds
+## Logs, entry lists and results
 
-This repository includes GitHub Actions workflows that automatically build and publish the Docker container to GitHub Container Registry whenever changes are pushed to the main branch. You can pull the latest version of the container directly from the GitHub Container Registry using:
+Logs shows recent ACC output and lets you download it with configured passwords redacted. Entry list edits ACC's `entrylist.json`, with JSON import/export. Save and restart ACC to apply entry-list changes.
+
+Results lists session JSON files produced by ACC. Enable Dump Leaderboards in Configuration to write them. Persist `/app/acc-server/results` in a volume if you want results to survive container replacement.
+
+Local paths can be overridden with `ACC_CONFIG_PATH`, `ACC_LOG_PATH` and `ACC_RESULTS_PATH`. The container defaults are `/app/acc-server/cfg`, `/app/wine.log` and `/app/acc-server/results`.
+
+## Releases and container images
+
+[Release Please](https://github.com/googleapis/release-please-action) opens a release PR from Conventional Commits. `fix:` increments the patch version, `feat:` increments the minor version, and `feat!:` or `fix!:` increments the major version. Use subjects of at most 100 characters without a commit body. When merging a PR, use a Conventional Commit squash title.
+
+Merging the release PR updates `package.json`, the lockfile and changelog, then creates a GitHub release. The UI reads its version from `package.json`. Docker's official actions publish the release image to GHCR with full-version, major/minor and `latest` tags. Builds from `main` remain available under `:main`.
+
+Enable “Allow GitHub Actions to create and approve pull requests” in repository Settings > Actions > General. The workflow uses the built-in `GITHUB_TOKEN`; it does not publish an npm package. Versioned images are published within the release workflow because events created with that token do not trigger another workflow.
 
 ```sh
-docker pull ghcr.io/g3ncl/acc-server-web:main
+docker pull ghcr.io/g3ncl/acc-server-web:latest
 ```
 
 ## Docker Compose (Optional)
@@ -70,9 +83,11 @@ services:
       - "<ACC_SERVER_PORT_TCP>:<ACC_SERVER_PORT_TCP>/tcp"
     volumes:
       - acc-server-cfg:/app/acc-server/cfg
+      - acc-server-results:/app/acc-server/results
 
 volumes:
   acc-server-cfg:
+  acc-server-results:
 ```
 
 Then run:
