@@ -58,11 +58,13 @@ Local paths can be overridden with `ACC_CONFIG_PATH`, `ACC_LOG_PATH` and `ACC_RE
 
 ## Releases and container images
 
-[Release Please](https://github.com/googleapis/release-please-action) opens a release PR from Conventional Commits. `fix:` increments the patch version, `feat:` increments the minor version, and `feat!:` or `fix!:` increments the major version. Use subjects of at most 100 characters without a commit body. When merging a PR, use a Conventional Commit squash title.
+Push Conventional Commits directly to `main`. After checks pass, [semantic-release](https://github.com/semantic-release/semantic-release), run through the [Semantic Release Action](https://github.com/cycjimmy/semantic-release-action), automatically creates a release without pull requests.
 
-Merging the release PR updates `package.json`, the lockfile and changelog, then creates a GitHub release. The UI reads its version from `package.json`. Docker's official actions publish the release image to GHCR with full-version, major/minor and `latest` tags. Builds from `main` remain available under `:main`.
+`fix:` increments the patch version, `feat:` increments the minor version, and `feat!:` or `fix!:` increments the major version. Documentation and CI changes alone do not create a release. Use subjects of at most 100 characters without a commit body.
 
-Enable “Allow GitHub Actions to create and approve pull requests” in repository Settings > Actions > General. The workflow uses the built-in `GITHUB_TOKEN`; it does not publish an npm package. Versioned images are published within the release workflow because events created with that token do not trigger another workflow.
+The workflow updates `package.json`, the lockfile and changelog, commits them with a short release message, and creates the Git tag and GitHub release. The UI reads its version from `package.json`. Docker's official actions publish full-version, major/minor and `latest` image tags. Builds from `main` remain available under `:main`.
+
+The workflow uses the built-in `GITHUB_TOKEN` with write access to repository contents and GHCR packages. It does not publish to npm. Branch rules must allow the release bot to push its version commit to `main`. After a release, pull the bot's commit before your next push.
 
 ```sh
 docker pull ghcr.io/g3ncl/acc-server-web:latest
