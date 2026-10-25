@@ -2,8 +2,13 @@
 import { AppShell, Flex, Text, UnstyledButton } from "@mantine/core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Settings, Medal, ChevronsLeftRightEllipsis } from "lucide-react";
+import {
+  Settings,
+  Medal,
+  ScrollText,
+  ListOrdered,
+  ChevronsLeftRightEllipsis,
+} from "lucide-react";
 import styles from "./Layout.module.css";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 
@@ -12,7 +17,9 @@ const version = process.env.version;
 const navItems = [
   { icon: ChevronsLeftRightEllipsis, label: "Status", href: "/status" },
   { icon: Settings, label: "Configuration", href: "/configuration" },
-  // { icon: Medal, label: "Results", href: "/results" },
+  { icon: ScrollText, label: "Logs", href: "/logs" },
+  { icon: ListOrdered, label: "Entry list", href: "/entry-list" },
+  { icon: Medal, label: "Results", href: "/results" },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

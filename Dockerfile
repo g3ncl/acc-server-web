@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   curl \
   gnupg \
   wine \
-  && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+  && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
   && apt-get install -y nodejs \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
@@ -72,6 +72,7 @@ RUN groupadd -g 1001 appgroup && \
     chmod +x /app/start.sh && \
     mkdir /app/log && \
     mkdir /app/acc-server/cfg && \
+    mkdir -p /app/acc-server/results && \
     chown -R appuser:appgroup /app
 
 USER appuser

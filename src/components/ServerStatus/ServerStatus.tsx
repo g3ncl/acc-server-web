@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import {
   Card,
+  Divider,
   Button,
   Text,
   Badge,
@@ -15,8 +16,20 @@ import { notifications } from "@mantine/notifications";
 import { useMobileDetection } from "@/hooks/useMobileDetection";
 import classes from "@/notifications/notifications.module.css";
 
+type ServerDetails = {
+  serverName?: string;
+  track?: string;
+  tcpPort?: number;
+  udpPort?: number;
+  registerToLobby?: 0 | 1;
+  maxConnections?: number;
+  maxCarSlots?: number;
+  carGroup?: string;
+};
+
 export function ServerStatus() {
   const [isRunning, setIsRunning] = useState<boolean | undefined>(undefined);
+  const [details, setDetails] = useState<ServerDetails>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isMobile = useMobileDetection();
@@ -25,7 +38,9 @@ export function ServerStatus() {
   const checkStatus = async (): Promise<boolean> => {
     try {
       const response = await fetch("/api/status");
+      if (!response.ok) throw new Error("Failed to fetch server status");
       const data = await response.json();
+      setDetails(data.details);
       setIsRunning(data.running);
       return data.running;
     } catch (error) {
@@ -195,6 +210,21 @@ export function ServerStatus() {
               </Badge>
             )}
           </Flex>
+
+          {details && (
+            <Stack gap="md">
+              <Divider />
+              <Stack gap="xs">
+                {details.serverName && <Text fw={500}>{details.serverName}</Text>}
+                {details.track && <Text size="sm">{details.track}</Text>}
+                <Text size="sm">Game TCP: {details.tcpPort ?? "—"} · Game UDP: {details.udpPort ?? "—"}</Text>
+                {details.registerToLobby !== undefined && <Text size="sm">Lobby registration: {details.registerToLobby ? "Enabled" : "Disabled"}</Text>}
+                {details.carGroup && <Text size="sm">Car group: {details.carGroup}</Text>}
+                {details.maxCarSlots !== undefined && <Text size="sm">Car slots: {details.maxCarSlots}</Text>}
+                {details.maxConnections !== undefined && <Text size="sm">Maximum connections: {details.maxConnections}</Text>}
+              </Stack>
+            </Stack>
+          )}
 
           <div>
             <Group justify="flex-end">

@@ -32,7 +32,7 @@
   font-weight: 500;
 }
 
-.navButton {
+.nav .navButton {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
@@ -44,16 +44,18 @@
   transition: all 0.2s ease;
 }
 
-.navButton:hover {
+.nav .navButton:hover {
   background-color: var(--mantine-primary-color-light);
 }
 
-.activeNavButton {
+.nav .activeNavButton,
+.mobileNav .activeNavButton {
   background-color: var(--mantine-primary-color-filled);
   color: var(--mantine-color-white);
 }
 
-.activeNavButton:hover {
+.nav .activeNavButton:hover,
+.mobileNav .activeNavButton:hover {
   background-color: var(--mantine-primary-color-filled-hover);
 }
 .mobileNav {
@@ -61,7 +63,7 @@
   flex-direction: row;
   justify-content: space-evenly;
 }
-.mobileNavButton {
+.mobileNav .mobileNavButton {
   display: flex;
   flex-direction: column;
   padding: 0.5rem 1rem;
@@ -70,4 +72,15 @@
   justify-content: center;
   align-items: center;
   flex-grow: 1;
+}
+
+.mobileLink {
+  width: 20%;
+  min-width: 0;
+}
+.mobileNav .mobileNavButton {
+  padding-inline: 4px;
+}
+.mobileNavButton .linkText {
+  font-size: 0.65rem;
 }

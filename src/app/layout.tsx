@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@mantine/core/styles.css";
+import "./globals.css";
 import "@mantine/notifications/styles.css";
 import { Ubuntu } from "next/font/google";
 
