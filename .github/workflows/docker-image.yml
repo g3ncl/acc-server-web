@@ -1,50 +1,35 @@
-name: Publish an existing release image
+name: Remove obsolete main image
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Existing version tag to publish (for example, 0.1.0)
-        required: true
-        type: string
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
-  build-and-push-image:
+  cleanup:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/github-script@v9
+        id: find
         with:
-          ref: refs/tags/${{ inputs.tag }}
-      - uses: actions/setup-node@v4
+          script: |
+            const versions = await github.paginate(
+              'GET /users/{username}/packages/{package_type}/{package_name}/versions',
+              { username: context.repo.owner, package_type: 'container', package_name: context.repo.repo, per_page: 100 }
+            );
+            const candidates = versions.filter(v => v.metadata?.container?.tags?.includes('main'));
+            for (const version of candidates) {
+              if (version.metadata.container.tags.length !== 1) {
+                throw new Error(`Refusing to delete version ${version.id}: it also has release tags`);
+              }
+              core.info(`Selected obsolete main-only image version ${version.id}`);
+            }
+            core.setOutput('ids', candidates.map(v => v.id).join(','));
+      - uses: actions/delete-package-versions@v5
+        if: steps.find.outputs.ids != ''
         with:
-          node-version: 22
-      - name: Verify release version
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: node -e 'if (require("./package.json").version !== process.env.RELEASE_TAG) throw new Error("Tag must match the package version")'
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=semver,pattern={{version}},value=${{ inputs.tag }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
-            type=raw,value=latest
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          package-name: ${{ github.event.repository.name }}
+          package-type: container
+          package-version-ids: ${{ steps.find.outputs.ids }}
