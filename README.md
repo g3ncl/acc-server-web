@@ -2,6 +2,8 @@
 
 acc-server-web is a Docker-based project that packages an Assetto Corsa Competizione (ACC) server running under Wine alongside a Next.js web application. The web UI lets you edit server configuration files, check server status, and manage the server (stop, start, and restart).
 
+For the Assetto Corsa EVO version, see [ace-server-web](https://github.com/g3ncl/ace-server-web).
+
 The web UI is built using Mantine v7.
 
 ## Getting Started
